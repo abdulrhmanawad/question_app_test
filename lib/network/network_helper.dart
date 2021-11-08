@@ -18,10 +18,10 @@ class QuestionApi {
     final response =
     await _request!.request<Questions>(params, cache: true);
     if (response.success) {
-      print("response is success");
+      print(response.status_message);
       return response;
     } else {
-      print("response is Nsuccess");
+      print(response.status_message);
       return const ResponseModel();
     }
   }

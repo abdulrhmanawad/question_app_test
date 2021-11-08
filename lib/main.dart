@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_app_question/bloc/network_repo.dart';
 import 'package:flutter_app_question/bloc/question_bloc.dart';
@@ -5,10 +7,16 @@ import 'package:flutter_app_question/model/question_model.dart';
 import 'package:flutter_app_question/model/response_model.dart';
 import 'package:flutter_app_question/network/network_helper.dart';
 import 'package:flutter_app_question/screens/question_screen.dart';
-import 'package:flutter_app_question/utilles/config_file.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext? context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+  }
+}
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());
 }
 
@@ -18,7 +26,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    String date=convertTime(1636319867);
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -26,7 +33,7 @@ class MyApp extends StatelessWidget {
       ),
       home: BlocProvider(
 create: (context)=>QuestionBloc(QusetionRepo()),
-          child: MyHomePage(title: date)),
+          child: const MyHomePage(title:"Question App")),
     );
   }
 }
@@ -88,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child:StreamBuilder<ResponseModel<Questions>>(
                   stream: state.questions,
                   builder: (context,snapshot){
-                    if(snapshot.hasData){
+                    if(snapshot.hasData&&snapshot.data?.results?.items!=null){
                       questions.addAll(snapshot.data!.results!.items!);
                       return ListView.builder(
                           padding: const EdgeInsets.all(16.0),
